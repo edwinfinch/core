@@ -35,12 +35,12 @@
     },
     "autoload": {
         "psr-4": {
-            "EdwinFinch\\TelegramBot\\": "src/"
+            "Longman\\TelegramBot\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "EdwinFinch\\TelegramBot\\Tests\\Unit\\": "tests/unit"
+            "Longman\\TelegramBot\\Tests\\Unit\\": "tests/unit"
         }
     },
     "scripts": {
