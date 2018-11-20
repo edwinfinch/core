@@ -10,7 +10,7 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/Longman/telegram-bot.svg)](https://packagist.org/packages/longman/telegram-bot)
 [![Downloads Month](https://img.shields.io/packagist/dm/Longman/telegram-bot.svg)](https://packagist.org/packages/longman/telegram-bot)
 [![Minimum PHP Version](http://img.shields.io/badge/php-%3E%3D5.6-8892BF.svg)](https://php.net/)
-[![License](https://img.shields.io/packagist/l/Longman/telegram-bot.svg)](https://github.com/php-telegram-bot/core/LICENSE.md)
+[![Licence](https://img.shields.io/packagist/l/Longman/telegram-bot.svg)](https://github.com/php-telegram-bot/core/LICENCE.md)
 
 
 
@@ -55,7 +55,7 @@ A Telegram Bot based on the official [Telegram Bot API][Telegram-Bot-API]
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 - [Donate](#donate)
-- [License](#license)
+- [Licence](#licence)
 - [Credits](#credits)
 
 
@@ -618,9 +618,9 @@ Donations are invested back into the project :+1:
 - Bitcoin: [166NcyE7nDxkRPWidWtG1rqrNJoD5oYNiV][bitcoin]
 - Ethereum: [0x485855634fa212b0745375e593fAaf8321A81055][ethereum]
 
-## License
+## Licence
 
-Please see the [LICENSE](LICENSE.md) included in this repository for a full copy of the MIT license,
+Please see the [LICENCE](LICENCE.md) included in this repository for a full copy of the MIT licence,
 which this project is licensed under.
 
 ## Credits
