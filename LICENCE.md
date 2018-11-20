@@ -1,4 +1,4 @@
-The [MIT License](http://opensource.org/licenses/mit-license.php)
+The MIT Licence
 
 Copyright (c) 2015 [Avtandil Kikabidze aka LONGMAN](https://github.com/akalongman)
 
