@@ -14,7 +14,10 @@ defined('TB_BASE_PATH') || define('TB_BASE_PATH', __DIR__);
 defined('TB_BASE_COMMANDS_PATH') || define('TB_BASE_COMMANDS_PATH', TB_BASE_PATH . '/Commands');
 
 use Exception;
+use Longman\TelegramBot\Commands\AdminCommand;
 use Longman\TelegramBot\Commands\Command;
+use Longman\TelegramBot\Commands\SystemCommand;
+use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Entities\ServerResponse;
 use Longman\TelegramBot\Entities\Update;
 use Longman\TelegramBot\Exception\TelegramException;
@@ -66,6 +69,13 @@ class Telegram
      * @var array
      */
     protected $commands_paths = [];
+
+    /**
+     * Custom commands objects
+     *
+     * @var array
+     */
+    protected $commands_objects = [];
 
     /**
      * Current Update object
@@ -177,7 +187,7 @@ class Telegram
         }
 
         //Add default system commands path
-        $this->addCommandsPath(TB_BASE_COMMANDS_PATH . '/SystemCommands');
+//        $this->addCommandsPath(TB_BASE_COMMANDS_PATH . '/SystemCommands');
 
         Request::initialize($this);
     }
@@ -250,7 +260,7 @@ class Telegram
 
                     require_once $file->getPathname();
 
-                    $command_obj = $this->getCommandObject($command);
+                    $command_obj = $this->getCommandObject($command, $file->getPathname());
                     if ($command_obj instanceof Command) {
                         $commands[$command_name] = $command_obj;
                     }
@@ -267,22 +277,56 @@ class Telegram
      * Get an object instance of the passed command
      *
      * @param string $command
+     * @param string $filepath
      *
      * @return \Longman\TelegramBot\Commands\Command|null
      */
-    public function getCommandObject($command)
+    public function getCommandObject($command, $filepath = null)
     {
         $which = ['System'];
         $this->isAdmin() && $which[] = 'Admin';
         $which[] = 'User';
 
         foreach ($which as $auth) {
-            $command_namespace = __NAMESPACE__ . '\\Commands\\' . $auth . 'Commands\\' . $this->ucfirstUnicode($command) . 'Command';
+            if($filepath){
+                $command_namespace = $this->getFileNamespace($filepath) . '\\' . $this->ucfirstUnicode($command) . 'Command';
+            } else {
+                $command_namespace = __NAMESPACE__ . '\\Commands\\' . $auth . 'Commands\\' . $this->ucfirstUnicode($command) . 'Command';
+            }
             if (class_exists($command_namespace)) {
-                return new $command_namespace($this, $this->update);
+                $command_obj = new $command_namespace($this, $this->update);
+                switch ($auth){
+                    case 'System':
+                        if($command_obj instanceof SystemCommand)
+                            return $command_obj;
+                        break;
+                    case 'Admin':
+                        if($command_obj instanceof AdminCommand)
+                            return $command_obj;
+                        break;
+                    case 'User':
+                        if($command_obj instanceof UserCommand)
+                            return $command_obj;
+                        break;
+                }
             }
         }
 
+        return null;
+    }
+
+    /**
+     * Get namespace from php file by src path
+     *
+     * @param string $src (absolute path to file)
+     *
+     * @return string ("Longman\TelegramBot\Commands\SystemCommands" for example)
+     */
+    function getFileNamespace($src) {
+        $content = file_get_contents($src);
+        if (preg_match('#^namespace\s+(.+?);$#sm', $content, $m)) {
+            return $m[1];
+        }
         return null;
     }
 
@@ -491,7 +535,7 @@ class Telegram
 
         //Make sure we have an up-to-date command list
         //This is necessary to "require" all the necessary command files!
-        $this->getCommandsList();
+        $this->commands_objects = $this->getCommandsList();
 
         //Make sure we don't try to process update that was already processed
         $last_id = DB::selectTelegramUpdate(1, $this->update->getUpdateId());
@@ -516,7 +560,10 @@ class Telegram
     public function executeCommand($command)
     {
         $command     = strtolower($command);
-        $command_obj = $this->getCommandObject($command);
+        $command_obj = isset($this->commands_objects[$command]) ? $this->commands_objects[$command] : null;
+        if(!$command_obj) {
+            $command_obj = $this->getCommandObject($command);
+        }
 
         if (!$command_obj || !$command_obj->isEnabled()) {
             //Failsafe in case the Generic command can't be found
