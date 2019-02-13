@@ -491,7 +491,7 @@ class Telegram
      * @return \Longman\TelegramBot\Entities\ServerResponse
      * @throws \Longman\TelegramBot\Exception\TelegramException
      */
-    public function processUpdate(Update $update)
+    public function processUpdate(Update $update, $is_custom_input = false)
     {
         $this->update = $update;
         $this->last_update_id = $update->getUpdateId();
@@ -499,47 +499,51 @@ class Telegram
         //If all else fails, it's a generic message.
         $command = 'genericmessage';
 
-        $update_type = $this->update->getUpdateType();
-        if ($update_type === 'message') {
-            $message = $this->update->getMessage();
-
-            //Load admin commands
-            if ($this->isAdmin()) {
-                $this->addCommandsPath(TB_BASE_COMMANDS_PATH . '/AdminCommands', false);
-            }
-
-            $type = $message->getType();
-            if ($type === 'command') {
-                $command = $message->getCommand();
-            } elseif (in_array($type, [
-                'new_chat_members',
-                'left_chat_member',
-                'new_chat_title',
-                'new_chat_photo',
-                'delete_chat_photo',
-                'group_chat_created',
-                'supergroup_chat_created',
-                'channel_chat_created',
-                'migrate_to_chat_id',
-                'migrate_from_chat_id',
-                'pinned_message',
-                'invoice',
-                'successful_payment',
-            ], true)
-            ) {
-                $command = $this->getCommandFromType($type);
-            }
-        } else {
-            $command = $this->getCommandFromType($update_type);
-        }
+//        $update_type = $this->update->getUpdateType();
+//        if ($update_type === 'message') {
+//            $message = $this->update->getMessage();
+//
+//            //Load admin commands
+//            if ($this->isAdmin()) {
+//                $this->addCommandsPath(TB_BASE_COMMANDS_PATH . '/AdminCommands', false);
+//            }
+//
+//            $type = $message->getType();
+//            if ($type === 'command') {
+//                $command = $message->getCommand();
+//            }
+//            elseif (in_array($type, [
+//                'new_chat_members',
+//                'left_chat_member',
+//                'new_chat_title',
+//                'new_chat_photo',
+//                'delete_chat_photo',
+//                'group_chat_created',
+//                'supergroup_chat_created',
+//                'channel_chat_created',
+//                'migrate_to_chat_id',
+//                'migrate_from_chat_id',
+//                'pinned_message',
+//                'invoice',
+//                'successful_payment',
+//            ], true)
+//            ) {
+//                $command = $this->getCommandFromType($type);
+//            }
+//        }
+//        else {
+//            $command = $this->getCommandFromType($update_type);
+//        }
 
         //Make sure we have an up-to-date command list
         //This is necessary to "require" all the necessary command files!
         $this->commands_objects = $this->getCommandsList();
 
+//        dd($this->commands_objects);
+
         //Make sure we don't try to process update that was already processed
         $last_id = DB::selectTelegramUpdate(1, $this->update->getUpdateId());
-        if ($last_id && count($last_id) === 1) {
+        if ($last_id && count($last_id) === 1 && !$is_custom_input) {
             TelegramLog::debug('Duplicate update received, processing aborted!');
             return Request::emptyResponse();
         }
